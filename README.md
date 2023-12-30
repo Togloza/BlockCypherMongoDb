@@ -23,7 +23,7 @@ Install dependencies:
 ```
 npm install
 ```
-
+**Make sure to update config.js before running the script.**
 Configuration
 Configure the script by updating the config.js file with your MongoDB connection details and Dogecoin addresses.
 
