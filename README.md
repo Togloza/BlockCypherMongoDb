@@ -27,7 +27,7 @@ npm install
 Configuration
 Configure the script by updating the config.js file with your MongoDB connection details and Dogecoin addresses.
 
-
+```
 // config.js
 module.exports = {
     mongoUri: 'mongodb+srv://<username>:<password>@<cluster-url>/<database>?retryWrites=true&w=majority',
@@ -36,6 +36,7 @@ module.exports = {
     database: '<database>',
     collection: '<collection>',
 };
+```
 Replace <username>, <password>, <cluster-url>, <database>, <collection>, with your MongoDB credentials and relevant details.
 
 Usage
