@@ -5,6 +5,10 @@ const cron = require('node-cron');
 const { addresses, mongoUri, preMintVals, database, collection, cronSchedule } = require('./config.js'); // Path to config variables
 let client;
 
+if (addresses.length !== preMintVals.length) {
+  throw new Error('Lengths of addresses and preMintVals arrays must be equal.');
+}
+
 // Function to connect to MongoDB
 async function connectToMongo() {
   try {
