@@ -67,12 +67,18 @@ async function updateData(query, update) {
   
 
 // Function to process api and mongo data and extract variables
-function processData(balanceData, launchpadData, preMint) {
+function processData(address, balanceData, launchpadData, preMint) {
   const balance = balanceData.balance;
   const launchpadPriceInDoge = launchpadData.launchpadPriceInDoge;
   const launchpadMintedSupply = launchpadData.launchpadMintedSupply;
 
   const minted = Math.floor(balance / (1e8 * launchpadPriceInDoge) + preMint);
+  console.log("Current Address: ", address);
+  console.log("Pre-Mint Value: ", preMint); 
+  console.log("Address Balance: ", balance);
+  console.log("Launchpad Price: ", launchpadPriceInDoge);
+  console.log("Current Launchpad Minted Supply: ", launchpadMintedSupply);
+  console.log("New Launchpad Minted Supply: ", minted);
 
   return { minted, launchpadMintedSupply };
 }
@@ -102,12 +108,10 @@ async function processAddresses() {
 
         console.log("Fetching Data Complete:");
 
-        const { minted, launchpadMintedSupply } = processData(apiData, mongoData, preMint);
+        const { minted, launchpadMintedSupply } = processData(address, apiData, mongoData, preMint);
 
         // Update MongoDB data
         if (minted !== NaN && minted !== undefined && minted > launchpadMintedSupply) {
-          console.log("Old LaunchpadMintedSupply: ", launchpadMintedSupply);
-          console.log("New LaunchpadMintedSupply: ", minted);
           console.log("Would Call to Update Database Here");
         } else if (minted === NaN || minted === undefined) {
           console.log("Minted Calculation Error");
