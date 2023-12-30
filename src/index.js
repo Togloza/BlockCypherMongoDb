@@ -1,6 +1,6 @@
 const axios = require('axios');
 const { MongoClient } = require('mongodb');
-const { cron } = require('node-cron');
+const cron = require('node-cron');
 
 const { addresses, mongoUri, preMintVals, database, collection, cronSchedule } = require('./config.js'); // Path to config variables
 let client;
@@ -10,10 +10,12 @@ async function connectToMongo() {
   try {
     client = await MongoClient.connect(mongoUri);
     console.log('Connected to MongoDB');
+    return true;
   } catch (error) {
     console.error('MongoDB connection error:', error.message);
     throw error;
   }
+  
 }
 
 // Function to insert data into MongoDB
@@ -78,48 +80,60 @@ function processData(balanceData, launchpadData, preMint) {
   return { minted, launchpadMintedSupply };
 }
 
-// Process each address: Connect to mongo, fetch api data, query mongo data, process data, update mongo if needed.
-async function processAddresses() {
-  // Connect to mongo  
-  try {
-    await connectToMongo();
-    } catch (e) {
-        console.log(e);
-    }
 
-    try {
-    
+
+// Function to process a single address
+async function processAddress(address, preMint) {
+  try {
+    const apiData = await fetchData(address);
+
+    const query = { launchpadFundingWallet: address.toString() };
+    const mongoData = await queryData(query);
+
+    console.log("Fetching Data For Address: ", address);
+
+    const { minted, launchpadMintedSupply } = processData(apiData, mongoData, preMint);
+    console.log("Old LaunchpadMintedSupply: ", launchpadMintedSupply);
+    console.log("New LaunchpadMintedSupply: ", minted);
+
+    // Update MongoDB data
+    if (!isNaN(minted) && minted !== undefined && minted > launchpadMintedSupply) {
+
+      const update = { $set: { launchpadMintedSupply: minted } };
+      await updateData(query, update);
+
+      console.log("Updating Data Complete");
+    } else if (isNaN(minted) || minted === undefined) {
+      console.log("Minted Calculation Error");
+    }
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+
+// Process each address: Connect to mongo, fetch api data, query mongo data, process data, update mongo if needed.
+async function execute() {
+  let mongoConnected = false;
+
+  // Connect to mongo
+  try {
+    mongoConnected = await connectToMongo();
+  } catch (e) {
+    console.log(e);
+    return;
+  }
+
+  if (!mongoConnected) {
+    console.log("MongoDB Connection Failed");
+    return;
+  } 
+
+  try {
     for (let i = 0; i < addresses.length; i++) {
-      
       const address = addresses[i];
       const preMint = preMintVals[i];
-      console.log("Updating address: ", address);
-
-      try {
-        const apiData = await fetchData(address);
-
-        const query = { launchpadFundingWallet: address.toString() };
-        const mongoData = await queryData(query);
-
-        console.log("Fetching Data Complete:");
-
-        const { minted, launchpadMintedSupply } = processData(apiData, mongoData, preMint);
-
-        // Update MongoDB data
-        if (minted !== NaN && minted !== undefined && minted > launchpadMintedSupply) {
-          console.log("Old LaunchpadMintedSupply: ", launchpadMintedSupply);
-          console.log("New LaunchpadMintedSupply: ", minted);
-
-          const update = { $set: { launchpadMintedSupply: minted } };
-          await updateData(query, update);
-
-          console.log("Updating Data Complete"); 
-        } else if (minted === NaN || minted === undefined) {
-          console.log("Minted Calculation Error");
-        }
-      } catch (e) {
-        console.log(e);
-      }
+      await processAddress(address, preMint);
     }
   } finally {
     // Close the MongoDB connection
@@ -132,9 +146,9 @@ async function processAddresses() {
 // Schedule the cron job 
 cron.schedule(cronSchedule, async () => {
   console.log('Running the job...');
-  await processAddresses();
+  await execute();
 });
 
 // Call the function to process addresses
-processAddresses();
+execute();
 

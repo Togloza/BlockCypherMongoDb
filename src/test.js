@@ -1,6 +1,6 @@
 const axios = require('axios');
 const { MongoClient } = require('mongodb');
-const { cron } = require('node-cron');
+const cron = require('node-cron');
 
 const { addresses, mongoUri, preMintVals, database, collection, cronSchedule } = require('./config.js'); // Path to config variables
 let client;
@@ -10,6 +10,7 @@ async function connectToMongo() {
   try {
     client = await MongoClient.connect(mongoUri);
     console.log('Connected to MongoDB');
+    return true;
   } catch (error) {
     console.error('MongoDB connection error:', error.message);
     throw error;
@@ -67,13 +68,13 @@ async function updateData(query, update) {
   
 
 // Function to process api and mongo data and extract variables
-function processData(address, balanceData, launchpadData, preMint) {
+function processData(balanceData, launchpadData, preMint) {
   const balance = balanceData.balance;
   const launchpadPriceInDoge = launchpadData.launchpadPriceInDoge;
   const launchpadMintedSupply = launchpadData.launchpadMintedSupply;
 
   const minted = Math.floor(balance / (1e8 * launchpadPriceInDoge) + preMint);
-  console.log("Current Address: ", address);
+
   console.log("Pre-Mint Value: ", preMint); 
   console.log("Address Balance: ", balance);
   console.log("Launchpad Price: ", launchpadPriceInDoge);
@@ -83,57 +84,70 @@ function processData(address, balanceData, launchpadData, preMint) {
   return { minted, launchpadMintedSupply };
 }
 
-// Process each address: Connect to mongo, fetch api data, query mongo data, process data, update mongo if needed.
-async function processAddresses() {
-  // Connect to mongo  
-  try {
-    await connectToMongo();
-    } catch (e) {
-        console.log(e);
-    }
 
+
+// Function to process a single address
+async function processAddress(address, preMint) {
     try {
-    
-    for (let i = 0; i < addresses.length; i++) {
-      
-      const address = addresses[i];
-      const preMint = preMintVals[i];
-      console.log("Updating address: ", address);
+      const apiData = await fetchData(address);
+  
+      const query = { launchpadFundingWallet: address.toString() };
+      const mongoData = await queryData(query);
+  
+      console.log("Fetching Data Complete:");
+      console.log("Current Address: ", address);
+      const { minted, launchpadMintedSupply } = processData(apiData, mongoData, preMint);
 
-      try {
-        const apiData = await fetchData(address);
-
-        const query = { launchpadFundingWallet: address.toString() };
-        const mongoData = await queryData(query);
-
-        console.log("Fetching Data Complete:");
-
-        const { minted, launchpadMintedSupply } = processData(address, apiData, mongoData, preMint);
-
-        // Update MongoDB data
-        if (minted !== NaN && minted !== undefined && minted > launchpadMintedSupply) {
-          console.log("Would Call to Update Database Here");
-        } else if (minted === NaN || minted === undefined) {
-          console.log("Minted Calculation Error");
-        }
-      } catch (e) {
-        console.log(e);
+      // Update MongoDB data
+      if (!isNaN(minted) && minted !== undefined && minted > launchpadMintedSupply) {
+        console.log("Would Update Data Here");
+      } else if (isNaN(minted) || minted === undefined) {
+        console.log("Minted Calculation Error");
       }
-    }
-  } finally {
-    // Close the MongoDB connection
-    if (client) {
-      client.close();
+    } catch (e) {
+      console.log(e);
     }
   }
-}
-
-// Schedule the cron job 
-cron.schedule(cronSchedule, async () => {
-  console.log('Running the job...');
-  await processAddresses();
-});
-
-// Call the function to process addresses
-processAddresses();
-
+  
+  
+  // Process each address: Connect to mongo, fetch api data, query mongo data, process data, update mongo if needed.
+  async function execute() {
+    let mongoConnected = false;
+  
+    // Connect to mongo
+    try {
+      mongoConnected = await connectToMongo();
+    } catch (e) {
+      console.log(e);
+      return;
+    }
+  
+    if (!mongoConnected) {
+      console.log("MongoDB Connection Failed");
+      return;
+    } 
+  
+    try {
+      for (let i = 0; i < addresses.length; i++) {
+        const address = addresses[i];
+        const preMint = preMintVals[i];
+        await processAddress(address, preMint);
+      }
+    } finally {
+      // Close the MongoDB connection
+      if (client) {
+        client.close();
+      }
+    }
+  }
+  
+  // Schedule the cron job 
+  cron.schedule(cronSchedule, async () => {
+    console.log('Running the job...');
+    await execute();
+  });
+  
+  // Call the function when starting script to process addresses
+  execute();
+  
+  
