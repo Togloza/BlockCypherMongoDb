@@ -56,4 +56,8 @@ Ensure that your MongoDB database is accessible, and the Dogecoin API is reachab
 
 **src/test.js is included to run the program without actually updating the database.**
 
+```
+node src/test.js
+```
+
 Feel free to customize the configuration and adapt the script to your specific use case. If you encounter any issues, check the console output for error messages, and ensure that your environment meets the prerequisites.
