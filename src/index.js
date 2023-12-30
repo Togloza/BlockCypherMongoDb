@@ -19,7 +19,7 @@ async function connectToMongo() {
 // Function to insert data into MongoDB
 async function insertData(data) {
   try {
-    const db = client.db();
+    const db = client.db(database);
     const collect = db.collection(collection);
     const result = await collect.insertOne(data);
   } catch (error) {
@@ -56,8 +56,8 @@ async function fetchData(address) {
 // Function to update data in MongoDB
 async function updateData(query, update) {
     try {
-      const db = client.db();
-      const collection = db.collection('test-collection');
+      const db = client.db(database);
+      const collection = db.collection(collection);
       const result = await collection.updateOne(query, update);
     } catch (error) {
       console.error('Error updating document:', error.message);
@@ -108,11 +108,7 @@ async function processAddresses() {
         if (minted !== NaN && minted !== undefined && minted > launchpadMintedSupply) {
           console.log("Old LaunchpadMintedSupply: ", launchpadMintedSupply);
           console.log("New LaunchpadMintedSupply: ", minted);
-
-          const update = { $set: { launchpadMintedSupply: minted } };
-          await updateData(query, update);
-
-          console.log("Updating Data Complete"); 
+          console.log("Would Call to Update Database Here");
         } else if (minted === NaN || minted === undefined) {
           console.log("Minted Calculation Error");
         }
