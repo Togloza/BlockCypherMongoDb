@@ -28,7 +28,7 @@ Configuration
 Configure the script by updating the config.js file with your MongoDB connection details and Dogecoin addresses.
 
 ```
-// config.js
+// src/config.js
 module.exports = {
     mongoUri: 'mongodb+srv://<username>:<password>@<cluster-url>/<database>?retryWrites=true&w=majority',
     addresses: ['address1', 'address2', 'address3'],
@@ -43,7 +43,7 @@ Usage
 Run the script with the following command:
 
 ```
-node script.js
+node src/index.js
 ```
 The script will connect to the MongoDB database, fetch data from the Dogecoin API for each address, process the data, and update the MongoDB database.
 
