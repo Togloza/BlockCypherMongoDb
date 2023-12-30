@@ -37,7 +37,8 @@ module.exports = {
     collection: '<collection>',
 };
 ```
-Replace <username>, <password>, <cluster-url>, <database>, <collection>, with your MongoDB credentials and relevant details.
+Replace `<username>` ,`<password>`, `<cluster-url>`, `<database>`, `<collection>` with your MongoDB credentials and relevant details.
+
 **If you are using an alternative auth for the database, include the relevant mongoURI.**
 
 Usage
