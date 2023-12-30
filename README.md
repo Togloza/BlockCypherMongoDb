@@ -41,6 +41,8 @@ Replace `<username>` ,`<password>`, `<cluster-url>`, `<database>`, `<collection>
 
 **If you are using an alternative auth for the database, include the relevant mongoURI.**
 
+The mongoURI can be found on the "Database" tab under "Deployment". Press Connect next to the relevant cluster and select Drivers.
+
 Usage
 Run the script with the following command:
 
