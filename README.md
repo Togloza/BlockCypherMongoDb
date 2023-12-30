@@ -24,7 +24,7 @@ Install dependencies:
 npm install
 ```
 **Make sure to update config.js before running the script.**
-Configuration
+
 Configure the script by updating the config.js file with your MongoDB connection details and Dogecoin addresses.
 
 ```
@@ -38,6 +38,7 @@ module.exports = {
 };
 ```
 Replace <username>, <password>, <cluster-url>, <database>, <collection>, with your MongoDB credentials and relevant details.
+**If you are using an alternative auth for the database, include the relevant mongoURI.**
 
 Usage
 Run the script with the following command:
