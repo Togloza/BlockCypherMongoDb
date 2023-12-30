@@ -108,11 +108,7 @@ async function processAddresses() {
         if (minted !== NaN && minted !== undefined && minted > launchpadMintedSupply) {
           console.log("Old LaunchpadMintedSupply: ", launchpadMintedSupply);
           console.log("New LaunchpadMintedSupply: ", minted);
-
-          const update = { $set: { launchpadMintedSupply: minted } };
-          await updateData(query, update);
-
-          console.log("Updating Data Complete"); 
+          console.log("Would Call to Update Database Here");
         } else if (minted === NaN || minted === undefined) {
           console.log("Minted Calculation Error");
         }

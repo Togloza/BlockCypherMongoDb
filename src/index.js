@@ -17,6 +17,7 @@ async function connectToMongo() {
 }
 
 // Function to insert data into MongoDB
+// Not used in script
 async function insertData(data) {
   try {
     const db = client.db(database);
@@ -108,7 +109,11 @@ async function processAddresses() {
         if (minted !== NaN && minted !== undefined && minted > launchpadMintedSupply) {
           console.log("Old LaunchpadMintedSupply: ", launchpadMintedSupply);
           console.log("New LaunchpadMintedSupply: ", minted);
-          console.log("Would Call to Update Database Here");
+
+          const update = { $set: { launchpadMintedSupply: minted } };
+          await updateData(query, update);
+
+          console.log("Updating Data Complete"); 
         } else if (minted === NaN || minted === undefined) {
           console.log("Minted Calculation Error");
         }
