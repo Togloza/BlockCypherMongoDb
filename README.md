@@ -41,6 +41,8 @@ Replace `<username>` ,`<password>`, `<cluster-url>`, `<database>`, `<collection>
 
 **If you are using an alternative auth for the database, include the relevant mongoURI.**
 
+The mongoURI can be found on the "Database" tab under "Deployment". Press Connect next to the relevant cluster and select Drivers.
+
 Usage
 Run the script with the following command:
 
@@ -53,5 +55,9 @@ Note
 Ensure that your MongoDB database is accessible, and the Dogecoin API is reachable from your environment.
 
 **src/test.js is included to run the program without actually updating the database.**
+
+```
+node src/test.js
+```
 
 Feel free to customize the configuration and adapt the script to your specific use case. If you encounter any issues, check the console output for error messages, and ensure that your environment meets the prerequisites.
