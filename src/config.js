@@ -5,4 +5,5 @@ module.exports = {
     preMintVals: [6045, 2630, 750],
     database: 'test-collection',
     collection: 'test-collection',
+    cronSchedule: '0 * * * *', // Use chatGPT to write cron schedules if needed. 
   };

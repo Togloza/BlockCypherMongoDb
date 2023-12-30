@@ -2,7 +2,7 @@ const axios = require('axios');
 const { MongoClient } = require('mongodb');
 const { cron } = require('node-cron');
 
-const { addresses, mongoUri, preMintVals, database, collection } = require('./config.js'); // Path to config variables
+const { addresses, mongoUri, preMintVals, database, collection, cronSchedule } = require('./config.js'); // Path to config variables
 let client;
 
 // Function to connect to MongoDB
@@ -94,7 +94,6 @@ async function processAddresses() {
       const preMint = preMintVals[i];
       console.log("Updating address: ", address);
 
-      
       try {
         const apiData = await fetchData(address);
 
@@ -128,6 +127,12 @@ async function processAddresses() {
     }
   }
 }
+
+// Schedule the cron job 
+cron.schedule(cronSchedule, async () => {
+  console.log('Running the job...');
+  await processAddresses();
+});
 
 // Call the function to process addresses
 processAddresses();
